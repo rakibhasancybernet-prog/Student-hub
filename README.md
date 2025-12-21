@@ -1,23 +1,48 @@
-# Student Hub (MVP)
+# 🎓 Student Hub (MVP)
 
-Student Hub is a web-based ecosystem designed for university students to manage their studies, assignments, and lab work in one place.
+> An all-in-one student productivity and portfolio ecosystem  
+> built to help university students **plan, track, and showcase** their academic journey.
 
-## Features (MVP)
-- Dashboard
-- Study Planner (upcoming)
-- Assignment Breakdown (upcoming)
-- Cyber Lab Tracker (upcoming)
+---
 
-## Tech Stack
-- Python
-- Flask
-- Jinja2 Templates
-- Git & GitHub
+## 🚀 What is Student Hub?
 
-## Status
-🚀 MVP Version – Actively under development
+**Student Hub** is a web-based platform designed for university students to manage:
+- 📚 study planning  
+- 📝 assignments  
+- 🧪 cybersecurity lab work  
 
-## Author
-Rakib Hasan 
-CQ University,Sydney.
-Bachelor of Information Technology (Cyber Security)
+—all in one centralized system.
+
+This project is being developed as a **real-world portfolio project**, not just a demo app.
+
+---
+
+## ✨ Features (MVP)
+
+✅ **Dashboard**  
+- Central overview of student activities  
+
+🕒 **Study Planner** *(coming soon)*  
+- Weekly study scheduling based on time & deadlines  
+
+🧠 **Assignment Breakdown Tool** *(coming soon)*  
+- Converts assignment questions into structured steps  
+
+🔐 **Cyber Lab Tracker** *(coming soon)*  
+- Track tools, labs, and generate a cybersecurity portfolio  
+
+---
+
+## 🧱 Project Architecture
+
+```text
+student-hub/
+│── app.py
+│── templates/
+│── static/
+│── modules/
+│   ├── planner/
+│   ├── assignments/
+│   └── labs/
+│── requirements.txt
