@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1 style="color:green;">{{ title }}</h1>
+
+  <p>
+    {{ message or "Welcome to Student-Hub! 🚀" }}
+  </p>
+
+  <ul>
+    <li>Planner module</li>
+    <li>Assignments module</li>
+    <li>Labs module</li>
+  </ul>
+{% endblock %}
