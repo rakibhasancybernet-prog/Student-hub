@@ -1,0 +1,9 @@
+/* Minimal polish on top of Bootstrap */
+.card { border-radius: 14px; }
+.btn, .form-control, .input-group-text { border-radius: 10px; }
+
+.navbar { box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+
+main.container { max-width: 980px; }
+
+.alert { border-radius: 12px; }

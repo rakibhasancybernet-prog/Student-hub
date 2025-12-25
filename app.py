@@ -8,7 +8,7 @@ import hashlib
 import base64
 
 app = Flask(__name__)
-app.secret_key = "change_this_secret_key"
+app.secret_key = "change_this_secret_key"  # later: use env var in production
 DB_NAME = "database.db"
 
 
@@ -37,6 +37,7 @@ def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         if "user_id" not in session:
+            flash("Please login to continue.", "warning")
             return redirect(url_for("login"))
         return f(*args, **kwargs)
     return decorated
@@ -66,6 +67,7 @@ def generate_strong_password(phrase: str, email: str) -> str:
     return "".join(pwd_list)
 
 
+# ✅ IMPORTANT: Public endpoint (works on Register page too)
 @app.route("/generate_password", methods=["POST"])
 def generate_password():
     phrase = request.form.get("phrase", "").strip()
@@ -75,6 +77,13 @@ def generate_password():
         return jsonify({"error": "Phrase and email are required"}), 400
 
     return jsonify({"password": generate_strong_password(phrase, email)})
+
+
+# Optional: separate page (keep or remove)
+@app.route("/password-generator")
+@login_required
+def password_generator_page():
+    return render_template("password_generator.html")
 
 
 @app.route("/")
@@ -87,12 +96,13 @@ def index():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
+        # Must match template input names: username/email/password
         username = request.form.get("username", "").strip()
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
 
         if not username or not email or not password:
-            flash("All fields are required.", "error")
+            flash("All fields are required.", "danger")
             return redirect(url_for("register"))
 
         pw_hash = generate_password_hash(password)
@@ -108,7 +118,8 @@ def register():
             flash("Account created. Please login.", "success")
             return redirect(url_for("login"))
         except sqlite3.IntegrityError:
-            flash("Email already registered. Try logging in.", "error")
+            # email UNIQUE -> same email cannot register twice
+            flash("Email already registered. Try logging in.", "danger")
             return redirect(url_for("register"))
 
     return render_template("register.html")
@@ -124,10 +135,12 @@ def login():
         user = conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
         conn.close()
 
+        # Generic message (good security practice)
         if not user or not check_password_hash(user["password_hash"], password):
-            flash("Invalid email or password.", "error")
+            flash("Invalid email or password.", "danger")
             return redirect(url_for("login"))
 
+        session.clear()
         session["user_id"] = user["id"]
         session["username"] = user["username"]
         flash("Logged in successfully.", "success")

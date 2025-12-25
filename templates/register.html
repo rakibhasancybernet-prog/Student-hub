@@ -1,59 +1,138 @@
 {% extends "base.html" %}
+{% block title %}Register | Student Hub{% endblock %}
+
 {% block content %}
-<h2>Signup</h2>
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h1 class="h4 mb-3">Register</h1>
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% for category, msg in messages %}
-    <p><b>{{ category }}:</b> {{ msg }}</p>
-  {% endfor %}
-{% endwith %}
+        <!-- ✅ Password Generator (inside Register page) -->
+        <div class="border rounded p-3 mb-4 bg-light">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <strong>Generate Strong Password</strong>
+            <span class="small text-muted">Recommended</span>
+          </div>
 
-<form method="POST">
-  <input type="text" name="username" placeholder="Username" required>
-  <input type="email" name="email" placeholder="Email" required>
+          <div class="mb-2">
+            <label class="form-label small">Master Phrase</label>
+            <input id="genPhrase" class="form-control" type="text" placeholder="Something memorable (not guessable)">
+          </div>
 
-  <hr>
+          <div class="mb-2">
+            <label class="form-label small">Email (identifier)</label>
+            <input id="genEmail" class="form-control" type="email" placeholder="you@example.com">
+            <div class="form-text">Different email/site → different password.</div>
+          </div>
 
-  <label>Type a phrase (we will generate a strong password):</label>
-  <input type="text" id="phrase" placeholder="e.g. i love you">
+          <button id="btnGen" class="btn btn-primary w-100" type="button">
+            Generate & Use This Password
+          </button>
 
-  <button type="button" onclick="genPass()">Generate Strong Password</button>
+          <div class="small text-warning mt-2 mb-0">
+            Save this password. We won’t show it again.
+          </div>
+        </div>
 
-  <br><br>
+        <!-- ✅ Register Form -->
+        <form method="post" id="registerForm">
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input class="form-control" type="text" name="username" required>
+          </div>
 
-  <label>Generated Password:</label>
-  <input type="text" id="generated_password" name="password" readonly required>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input class="form-control" id="regEmail" type="email" name="email" required>
+          </div>
 
-  <br><br>
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <div class="input-group">
+              <input class="form-control" id="regPassword" type="text" name="password" required>
+              <button id="btnCopy" class="btn btn-outline-secondary" type="button" disabled>Copy</button>
+            </div>
+            <div class="form-text">You can type your own password or generate above.</div>
+          </div>
 
-  <button type="submit">Create Account</button>
-</form>
+          <button class="btn btn-warning w-100" type="submit">Create account</button>
+        </form>
 
-<p>Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
 
+{% block scripts %}
 <script>
-async function genPass() {
-  const phrase = document.getElementById("phrase").value.trim();
-  const email = document.querySelector('input[name="email"]').value.trim();
+  const genPhrase = document.getElementById("genPhrase");
+  const genEmail  = document.getElementById("genEmail");
+  const regEmail  = document.getElementById("regEmail");
+  const regPw     = document.getElementById("regPassword");
+  const btnGen    = document.getElementById("btnGen");
+  const btnCopy   = document.getElementById("btnCopy");
 
-  if (!phrase || !email) {
-    alert("Please enter email and phrase first");
-    return;
+  function setCopyState() {
+    btnCopy.disabled = !regPw.value;
   }
+  setCopyState();
 
-  const formData = new FormData();
-  formData.append("phrase", phrase);
-  formData.append("email", email);
+  // Keep generator email synced with register email (nice UX)
+  regEmail.addEventListener("input", () => {
+    if (!genEmail.value) genEmail.value = regEmail.value;
+  });
 
-  const res = await fetch("/generate_password", { method: "POST", body: formData });
-  const data = await res.json();
+  btnGen.addEventListener("click", async () => {
+    const phrase = genPhrase.value.trim();
+    const email = (genEmail.value.trim() || regEmail.value.trim()).toLowerCase();
 
-  if (!res.ok) {
-    alert(data.error || "Failed to generate password");
-    return;
-  }
+    if (!phrase || !email) {
+      alert("Please enter Phrase and Email to generate a password.");
+      return;
+    }
 
-  document.getElementById("generated_password").value = data.password;
-}
+    btnGen.disabled = true;
+    btnGen.textContent = "Generating...";
+
+    try {
+      const res = await fetch("{{ url_for('generate_password') }}", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ phrase, email })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "Failed to generate password");
+        return;
+      }
+
+      // ✅ Auto-fill password for registration
+      regPw.value = data.password;
+      setCopyState();
+
+      // ✅ Also fill register email if empty
+      if (!regEmail.value) regEmail.value = email;
+
+      alert("Password generated and filled. Save it now!");
+    } catch (e) {
+      alert("Network error. Try again.");
+    } finally {
+      btnGen.disabled = false;
+      btnGen.textContent = "Generate & Use This Password";
+    }
+  });
+
+  btnCopy.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(regPw.value);
+      btnCopy.textContent = "Copied!";
+      setTimeout(() => btnCopy.textContent = "Copy", 900);
+    } catch (e) {
+      alert("Copy failed. Please copy manually.");
+    }
+  });
 </script>
 {% endblock %}

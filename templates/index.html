@@ -1,15 +1,11 @@
 {% extends "base.html" %}
+{% block title %}Home | Student Hub{% endblock %}
 
 {% block content %}
-  <h1 style="color:green;">{{ title }}</h1>
-
-  <p>
-    {{ message or "Welcome to Student-Hub! 🚀" }}
-  </p>
-
-  <ul>
-    <li>Planner module</li>
-    <li>Assignments module</li>
-    <li>Labs module</li>
-  </ul>
+<div class="card shadow-sm">
+  <div class="card-body p-4">
+    <h1 class="h4 mb-2">Welcome</h1>
+    <p class="text-muted mb-0">Your student tools in one place.</p>
+  </div>
+</div>
 {% endblock %}
